@@ -58,9 +58,11 @@ function removeExt(myDoc){
   var str = myDoc.split(".");
   var name = str[0].toLowerCase();
   //var replace = /&|\u0027|\u2019|\u2018|and|,|:|\.|!|\u2013|\u2014|\u002d/g, "";
+  name = name.replace(/ *\([^)]*\) */g, "");//remove parenthesis with stuff inside
 	name = name.replace(/-|\s/g,"_");
   name = name.replace(/__/g, "_");
-    return name;
+  
+  return name;
 }
 
 function cleanText(name) { 
