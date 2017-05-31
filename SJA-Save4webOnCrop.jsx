@@ -56,8 +56,11 @@ function sharpenMe(amount,radius,thresh){
 
 function removeExt(myDoc){
   var str = myDoc.split(".");
-  var ext = str[0]
-    return ext;
+  var name = str[0].toLowerCase();
+  //var replace = /&|\u0027|\u2019|\u2018|and|,|:|\.|!|\u2013|\u2014|\u002d/g, "";
+	name = name.replace(/-|\s/g,"_");
+  name = name.replace(/__/g, "_");
+    return name;
 }
 
 function cleanText(name) { 
@@ -70,6 +73,7 @@ function cleanText(name) {
    } 
    return m[1].replace(/\./g, '') + m[2]; 
 }
+
 function clearSlices(){
 // =======================================================
 var id72 = charIDToTypeID( "Dlt " );
@@ -109,14 +113,34 @@ function findFolder(fName){
 	
 return path;
 }
+function documentIsNew(doc){
+// assumes doc is the activeDocument
+
+cTID = function(s) { return app.charIDToTypeID(s); }
 
 
+var ref = new ActionReference();
+ref.putEnumerated( cTID("Dcmn"),
+cTID("Ordn"),
+cTID("Trgt") ); //activeDoc
+var desc = executeActionGet(ref);
+
+var rc = true;
+if (desc.hasKey(cTID("FilR"))) { //FileReference
+var path = desc.getPath(cTID("FilR"));
+if (path) {
+rc = (path.absoluteURI.length == 0);
+}
+}
+return rc;
+};
 
 
-
+var addSize2Name = true;
 var docRef = activeDocument;
 
 //var docPath = docRef.fullName.parent.fsName;  //won't work when document is a pdf
+
 
 var totalPixels = 786432;
 var newName = removeExt(docRef.name);
@@ -126,35 +150,38 @@ var newName = removeExt(docRef.name);
 var width = docRef.width.toString();
 var height = docRef.height.toString();
 
+
 //then strip off the trailing "px"
 var w = width.split(" ");
 var h = height.split(" ");
 
-//UNCOMMENT NEXT LINE TO ADD SIZE TO END OF FILNAME
-newName = cleanText(newName+"-"+w[0]+"x"+h[0]);
-
+if(addSize2Name == true){
+  newName = cleanText(newName+"_"+w[0]+"x"+h[0]);
+}
 
 var ext = getExt(docRef.name);
 
 
-
-
-
 //sharpenMe(50,1,10);
-
 
 //if there are slices, clear slices
 //clearSlices();
 
 
-
-
-var quality = 70;
+var quality = 60;
 var y = activeDocument.artLayers.length;
-
 var x = activeDocument.artLayers[y-1];
 
-var cPath = docRef.path+"/";
+
+//var saved = docRef.saved;
+var isNew = documentIsNew(docRef);
+
+if(isNew == true){
+	var cPath = "~/My Documents/_PowerPointHolding/";
+	newName=prompt("Please enter a name for this file.","<-- filename -->","Input your text here");
+}else{
+	var cPath = docRef.path+"/";
+}
 
 
 var cPathFold = new Folder("~/My Documents/_PowerPointHolding/");
@@ -163,7 +190,9 @@ if (cPathFold.exists == false) cPathFold.create();
 
 
 if(x.visible && x.isBackgroundLayer){
-saveForWebJPG(cPath,docRef,quality,newName);
-}else{saveForWebPNG(cPath,docRef,70,newName);}
+	saveForWebJPG(cPath,docRef,quality,newName);
+}else{
+	saveForWebPNG(cPath,docRef,quality,newName);
+}
 
 docRef.close(SaveOptions.DONOTSAVECHANGES);
