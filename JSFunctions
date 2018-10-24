@@ -1,0 +1,138 @@
+function getQueryVariable(variable)
+{
+	 var query = window.location.search.substring(1);
+	 var vars = query.split("&");
+	 for (var i=0;i<vars.length;i++) {
+					 var pair = vars[i].split("=");
+					 if(pair[0] == variable){return pair[1];}
+	 }
+	 return(false);
+}
+
+function setCookie(c_name,value,exdays)
+{
+	 var exdate=new Date();
+	 exdate.setHours(exdate.getHours() + exdays);
+	 var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+	 document.cookie=c_name + "=" + c_value;
+}
+
+function getCookie(c_name)
+{
+	 var i,x,y,ARRcookies=document.cookie.split(";");
+	 for (i=0;i<ARRcookies.length;i++)
+	 {
+			x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+			y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+			x=x.replace(/^\s+|\s+$/g,"");
+			if (x==c_name)
+			{
+				 return unescape(y);
+			}
+	 }
+}
+
+function isScrolledIntoView(elem)
+{
+    var $elem = $(elem);
+    var $window = $(window);
+
+    var docViewTop = $window.scrollTop();
+    var docViewBottom = docViewTop + $window.height();
+
+    var elemTop = $elem.offset().top;
+    var elemBottom = elemTop + $elem.height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+}
+
+function readCookie(name) {
+		var nameEQ = name + "=";
+		var ca = document.cookie.split(';');
+		for (var i = 0; i < ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+				if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,
+						c.length);
+		}
+		return null;
+}
+
+function loadImages(slideshow){
+	$(slideshow).children().each(function(){
+		var dataSrc = $(this).data('src');
+		
+		$(this).attr('src',dataSrc);
+		})
+		
+}
+function advanceGallery(){
+	
+	var $gal = $(".sdta-gallery-rotator");
+	var $first = $gal.find(':first-child');
+	if($gal.find(".active").length == 0){
+		var img = $first;
+		img.next().addClass('active');
+		img.next().fadeIn();
+	}else{
+		var img = $gal.find('.active');
+		if(img.is(":last-child")){
+			$(".gallery-image-link").fadeOut().removeClass("active");
+			$($first).fadeIn();
+		}else{
+			img.next().fadeIn();
+			img.next().addClass('active');
+			img.removeClass('active');
+		}
+	}
+	t=setTimeout(advanceGallery, 5000);
+	
+}
+
+function goNext(me){
+	clearTimeout(t);
+				var $previous = me.parent().prev();
+				if($previous.hasClass("sdta-gallery-rotator")){
+					var lastImage = $previous.find('a:last-child');
+				}else{
+					var lastImage = $previous.find('img:last-child');
+				}
+
+				if(lastImage.is(":visible")!= true){
+       
+				 if($previous.find('.active').length == 0){//slideshow has not been initiated, no active class exists
+					var img = $previous.find(':first-child');
+
+					img.next().addClass('active');
+					//img.fadeOut('fast');
+					img.next().fadeIn();	 
+				 }else{
+					var img = $previous.find('.active');
+					//img.addClass('last-active');
+					img.next().fadeIn();
+					img.next().addClass('active');
+					//img.fadeOut('fast');
+					img.removeClass('active');
+								 
+				 }		
+				}
+				t=setTimeout(advanceGallery, 15000);
+		}
+function goBack(me){
+	clearTimeout(t);
+				var $previous = me.parent().prev();
+				var secondImage = $previous.find(':first-child').next();
+       if(secondImage.is(":visible")== true){
+				 if($previous.find('.active').length == 0){//slideshow has not been initiated, no active class exists
+						//do nothing 
+				 }else{
+					var img = $previous.find('.active');
+				
+					img.prev().addClass('active');
+					img.fadeOut('fast');
+					img.removeClass('active');
+								 
+				 }		
+			 }
+			 t=setTimeout(advanceGallery, 15000);
+		}		
